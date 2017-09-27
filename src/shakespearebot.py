@@ -2,6 +2,7 @@ import tweepy
 import configparser
 from random import randint
 from nltk.corpus import shakespeare
+from nltk.tokenize import TweetTokenizer
 import time
 import datetime
 
@@ -99,6 +100,11 @@ def generateTweet(limit):
                         api.update_status(tweet)
                         tweetcount += 1
                         time.sleep(randint(240, 28800))
+
+                        if not time_range(datetime.time(randint(6, 9), randint(0, 59), 0),
+                                   datetime.time(rand_list_item([0, 23, 22]), randint(0, 59), 0)):
+                            return tweetcount, error
+
                 except tweepy.error.RateLimitError:
                     error = True
                     break
