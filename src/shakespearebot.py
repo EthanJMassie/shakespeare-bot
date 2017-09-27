@@ -26,8 +26,8 @@ def main():
         count = 0
         error = False
 
-        while count < randint(1, 10) and not error \
-                and time_range(datetime.time(randint(6, 9), randint(0, 59), 0), datetime.time(rand_list_item([0, 23, 22]), randint(0, 59), 0)):
+        while count < randint(1, 10) and not error and time_range(datetime.time(randint(6, 9), randint(0, 59), 0), datetime.time(randint(22,23), randint(0, 59), 0)):
+            print('Doing some tweeting')
             returned_tuple = generateTweet(randint(1, 3))
             count += returned_tuple[0]
             error = returned_tuple[1]
@@ -99,6 +99,8 @@ def generateTweet(limit):
                         api.update_status(tweet)
                         tweetcount += 1
                         time.sleep(randint(240, 28800))
+                        if not time_range(datetime.time(randint(6, 9), randint(0, 59), 0), datetime.time(rand_list_item([0, 23, 22]), randint(0, 59), 0)):
+                             return tweetcount, error
                 except tweepy.error.RateLimitError:
                     error = True
                     break
@@ -115,11 +117,15 @@ def delete_tweets():
 def follow_users():
     '''Finds random users to follow'''
     try:
+        count = 0
         for friend in api.me().friends():
             for x in friend.friends():
                 if not x.following:
                     print("Now following " + x.screen_name)
                     api.create_friendship(x.screen_name)
+                    count += 1
+                if count >= 10:
+                    return False
                 time.sleep(60)
     except tweepy.error.RateLimitError:
         return True
