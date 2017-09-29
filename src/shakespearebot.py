@@ -1,19 +1,21 @@
 import tweepy
 import configparser
+from random import choice
 from random import randint
 from nltk.corpus import shakespeare
 from nltk.tokenize import TweetTokenizer
 import time
+import yaml
 import datetime
 
 #Initialize parser for reading config file
 config = configparser.ConfigParser()
 
 #Read from config file in the above directory
-config.read('../keys.ini')
+config.read('../config.ini')
 
-#Uses keys defined in the keys.ini file to authenticate connection with twitter account
-#Don't forget to add your keys to keys.ini
+#Uses keys defined in the config.ini file to authenticate connection with twitter account
+#Don't forget to add your keys to config.ini
 auth = tweepy.OAuthHandler(config['OAuth']['public'], config['OAuth']['private'])
 auth.set_access_token(config['AccessToken']['public'],config['AccessToken']['private'])
 
@@ -26,9 +28,9 @@ def main():
     while True:
         count = 0
         error = False
-
-        while count < randint(1, 10) and not error \
-                and time_range(datetime.time(randint(6, 9), randint(0, 59), 0), datetime.time(rand_list_item([0, 23, 22]), randint(0, 59), 0)):
+        '''
+        while count < randint(1, 10) and not error and time_range(datetime.time(randint(6, 9), randint(0, 59), 0), datetime.time(randint(22,23), randint(0, 59), 0)):
+            print('Doing some tweeting')
             returned_tuple = generateTweet(randint(1, 3))
             count += returned_tuple[0]
             error = returned_tuple[1]
@@ -42,21 +44,41 @@ def main():
 
         if error:
             print("Rate limit reached\nCooling off...")
-            time.sleep(120)
+            time.sleep(120)'''
 
+        #Check for mentions and reply to them
+        mentions = None
+        since_id = config['ID']['since_id']
+        while True:
+            try:
+                mentions = api.search(q='@RealBillyShake' + '-filter:retweets', count=100, since_id=since_id)
+                if not mentions:
+                    print("No mentions found")
+                    break
+                for tweet in mentions:
 
+                    if int(tweet.id) > int(since_id):
+                        since_id = tweet.id
+                        reply_tweets(tweet)
 
+            except tweepy.TweepError as e:
+                print("some error : " + str(e))
+                break
+        config.set('ID', 'since_id', str(since_id))
+
+        with open('../config.ini', 'w') as configfile:
+            config.write(configfile)
 
 
 
 def generateTweet(limit):
     files = list(shakespeare.fileids())
-    randFile = rand_list_item(files)
+    randFile = choice(files)
 
     play = shakespeare.xml(randFile)
 
     characters = list(speaker.text for speaker in play.findall('*/*/*/SPEAKER'))
-    character = rand_list_item(characters)
+    character = choice(characters)
 
     tweetcount = 0
     error = False
@@ -74,7 +96,7 @@ def generateTweet(limit):
                 tweet += text[y + add]
                 add += 1
                 newLine = False
-                # Continue adding lines till ending punctuation . or ! is found
+                # Continue adding lines till ending punctuation . or ! or ? is found
                 try:
 
                     while not tweet.endswith('.') or not tweet.endswith('!') or not tweet.endswith('?'):
@@ -100,15 +122,42 @@ def generateTweet(limit):
                         api.update_status(tweet)
                         tweetcount += 1
                         time.sleep(randint(240, 28800))
-
-                        if not time_range(datetime.time(randint(6, 9), randint(0, 59), 0),
-                                   datetime.time(rand_list_item([0, 23, 22]), randint(0, 59), 0)):
-                            return tweetcount, error
-
+                        if not time_range(datetime.time(randint(6, 9), randint(0, 59), 0), datetime.time(choice([0, 23, 22]), randint(0, 59), 0)):
+                             return tweetcount, error
                 except tweepy.error.RateLimitError:
                     error = True
                     break
     return tweetcount, error
+
+#TODO: Add logic for reply tweets
+def reply_tweets(mention):
+    #Used for tokenizing tweets
+    tokenize = TweetTokenizer(reduce_len=True)
+    toke = tokenize.tokenize(mention.text)
+
+    #Analyze mention
+    for x in toke:
+        pass
+
+    #Generate random insult
+    insults = yaml.load(open('../insults.yml'))
+    insult = '@' + mention.user.screen_name + ' thou ' + choice(insults['column1']) + ' ' \
+             + choice(insults['column2']) + ' ' + choice(insults['column3'])
+    print(insult)
+    api.update_status(insult, mention.id)
+    time.sleep(randint(60 * 3, 60 * 5))
+
+
+
+#TODO: Add logic for replying to direct messages
+def direct_message_reply():
+    pass
+
+
+
+#TODO: Add logic for tagging people in tweets
+def tagged_tweet():
+    pass
 
 
 def delete_tweets():
@@ -121,11 +170,15 @@ def delete_tweets():
 def follow_users():
     '''Finds random users to follow'''
     try:
+        count = 0
         for friend in api.me().friends():
             for x in friend.friends():
                 if not x.following:
                     print("Now following " + x.screen_name)
                     api.create_friendship(x.screen_name)
+                    count += 1
+                if count >= 10:
+                    return False
                 time.sleep(60)
     except tweepy.error.RateLimitError:
         return True
@@ -141,6 +194,4 @@ def time_range(start, end):
     else:
         return start <= now or now <= end
 
-def rand_list_item(list):
-    return list[randint(0, len(list) - 1)]
 main()
