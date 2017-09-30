@@ -44,7 +44,6 @@ def main():
             time.sleep(120)
 
         #Check for mentions and reply to them
-        mentions = None
         since_id = config['ID']['since_id']
         while True:
             try:
@@ -53,7 +52,6 @@ def main():
                     print("No mentions found")
                     break
                 for tweet in mentions:
-
                     if int(tweet.id) > int(since_id):
                         since_id = tweet.id
                         reply_tweets(tweet)
@@ -136,7 +134,7 @@ def reply_tweets(mention):
     sent = analysis.sentiment
 
     #Say something mean
-    if sent.polarity < .5 or mention.text.lower().contains('roastme'):
+    if sent.polarity < 0.0 or mention.text.lower().contains('roastme'):
         #Generate random insult
         insults = yaml.load(open('../insults.yml'))
         insult = '@' + mention.user.screen_name + ' thou ' + choice(insults['column1']) + ' ' \
@@ -144,7 +142,7 @@ def reply_tweets(mention):
         print(insult)
         api.update_status(insult, mention.id)
     #Say something nice
-    elif sent.polarity >= .5:
+    elif sent.polarity >= 0.0:
         comps = yaml.load(open('../compliments.yml'))
         compliment = '@' + mention.user.screen_name + ' thou ' + choice(comps['column1']) + ' ' \
                  + choice(comps['column2']) + ' ' + choice(comps['column3'])
