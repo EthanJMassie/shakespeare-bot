@@ -177,14 +177,25 @@ def delete_tweets():
 
 
 def follow_users():
-    '''Finds random users to follow'''
+    '''Finds users to follow'''
     try:
         count = 0
+        #Follow users that follow account
+        for follower in api.me().followers():
+            if not follower.following:
+                api.create_friendship(follower.screen_name)
+                print("Now following " + follower.screen_name)
+                count += 1
+                if count >= 10:
+                    return False
+                time.sleep(40)
+            time.sleep(20)
+
         for friend in api.me().friends():
             for x in friend.friends():
                 if not x.following and x.screen_name != api.me().screen_name:
-                    print("Now following " + x.screen_name)
                     api.create_friendship(x.screen_name)
+                    print("Now following " + x.screen_name)
                     count += 1
                 if count >= 10:
                     return False
