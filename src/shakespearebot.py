@@ -28,7 +28,8 @@ def main():
     while True:
         error = False
 
-        if not error and time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0)):
+        if not error and time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0))\
+                and randint(0, 3) == 2:
             print('Doing some tweeting')
             error = generateTweet()
 
@@ -57,7 +58,7 @@ def main():
                         reply_tweets(tweet)
 
             except tweepy.TweepError as e:
-                print("some error : " + str(e))
+                print("Error: " + str(e))
                 break
         config.set('ID', 'since_id', str(since_id))
 
@@ -128,13 +129,19 @@ def generateTweet():
 
 #TODO: Add logic for reply tweets
 def reply_tweets(mention):
+    thankful_strings = ['thank you', 'thanks', 'thnx']
+    fighting_words = ['roastme', 'roast me', '#roastme']
     '''Reply to mentions on twitter'''
     #Analyze parts of speech of mention and get sentiment
     analysis = TextBlob(mention.text)
     sent = analysis.sentiment
 
+    if any(x in mention.text.lower() for x in thankful_strings):
+        reply = '@' + mention.user.screen_name +  " Thou art welcometh"
+        print(reply)
+        api.update_status(reply, mention.id)
     #Say something mean
-    if sent.polarity < 0.0 or 'roastme' in mention.text.lower():
+    elif sent.polarity < 0.0 or any(x in mention.text.lower() for x in fighting_words):
         #Generate random insult
         insults = yaml.load(open('../insults.yml'))
         insult = '@' + mention.user.screen_name + ' thou ' + choice(insults['column1']) + ' ' \
@@ -175,7 +182,7 @@ def follow_users():
         count = 0
         for friend in api.me().friends():
             for x in friend.friends():
-                if not x.following:
+                if not x.following and x.screen_name != api.me().screen_name:
                     print("Now following " + x.screen_name)
                     api.create_friendship(x.screen_name)
                     count += 1
@@ -183,7 +190,10 @@ def follow_users():
                     return False
                 time.sleep(60)
     except tweepy.error.RateLimitError:
+        print("Rate limit reached")
         return True
+    except tweepy.error.TweepError as e:
+        print("Error: " + str(e) )
 
     return False
 
