@@ -3,7 +3,7 @@ import configparser
 from random import choice
 from random import randint
 from nltk.corpus import shakespeare
-from nltk.tokenize import TweetTokenizer
+from textblob import TextBlob
 import time
 import yaml
 import datetime
@@ -26,25 +26,22 @@ api = tweepy.API(auth)
 def main():
 
     while True:
-        count = 0
         error = False
-        '''
-        while count < randint(1, 10) and not error and time_range(datetime.time(randint(6, 9), randint(0, 59), 0), datetime.time(randint(22,23), randint(0, 59), 0)):
+
+        if not error and time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0)):
             print('Doing some tweeting')
-            returned_tuple = generateTweet(randint(1, 3))
-            count += returned_tuple[0]
-            error = returned_tuple[1]
+            #error = generateTweet()
 
         if error:
             print("Rate limit reached\nCooling off...")
             time.sleep(120)
 
         print("Follow users")
-        error = follow_users()
+        #error = follow_users()
 
         if error:
             print("Rate limit reached\nCooling off...")
-            time.sleep(120)'''
+            time.sleep(120)
 
         #Check for mentions and reply to them
         mentions = None
@@ -69,9 +66,13 @@ def main():
         with open('../config.ini', 'w') as configfile:
             config.write(configfile)
 
+        sleep = randint(120, 14400)
+        print('Sleeping for ' + str(sleep) + "\nStarted at " + str(datetime.datetime.now().time()))
+        time.sleep(sleep)
 
 
-def generateTweet(limit):
+
+def generateTweet():
     files = list(shakespeare.fileids())
     randFile = choice(files)
 
@@ -80,7 +81,6 @@ def generateTweet(limit):
     characters = list(speaker.text for speaker in play.findall('*/*/*/SPEAKER'))
     character = choice(characters)
 
-    tweetcount = 0
     error = False
     # loop through text of the selected play
     for x in play:
@@ -89,7 +89,7 @@ def generateTweet(limit):
         text = list(x.itertext())
         for y in range(0, len(text) - 1):
             # Find text that matches the selected characters name
-            if text[y].lower() == character.lower() and tweetcount < limit:
+            if text[y].lower() == character.lower():
                 # Add this characters lines to the tweet
                 add = 2
                 tweet = ''
@@ -117,35 +117,40 @@ def generateTweet(limit):
                     pass
                 try:
                     # Randomly select if a tweet should be posted and insure proper length
-                    if randint(0, 7) == 2 and len(tweet) <= 140 and len(tweet) != 0:
+                    if randint(0, 15) == 2 and len(tweet) <= 140 and len(tweet) != 0:
                         print(tweet)
                         api.update_status(tweet)
-                        tweetcount += 1
-                        time.sleep(randint(240, 28800))
-                        if not time_range(datetime.time(randint(6, 9), randint(0, 59), 0), datetime.time(choice([0, 23, 22]), randint(0, 59), 0)):
-                             return tweetcount, error
+
+                        time.sleep(240)
+                        if not time_range(datetime.time(randint(8), randint(0, 59), 0), datetime.time(22, randint(0, 59), 0)):
+                             return error
                 except tweepy.error.RateLimitError:
                     error = True
                     break
-    return tweetcount, error
+    return error
 
 #TODO: Add logic for reply tweets
 def reply_tweets(mention):
-    #Used for tokenizing tweets
-    tokenize = TweetTokenizer(reduce_len=True)
-    toke = tokenize.tokenize(mention.text)
+    '''Reply to mentions on twitter'''
+    #Analyze parts of speech of mention and get sentiment
+    analysis = TextBlob(mention.text)
+    sent = analysis.sentiment
 
-    #Analyze mention
-    for x in toke:
-        pass
-
-    #Generate random insult
-    insults = yaml.load(open('../insults.yml'))
-    insult = '@' + mention.user.screen_name + ' thou ' + choice(insults['column1']) + ' ' \
-             + choice(insults['column2']) + ' ' + choice(insults['column3'])
-    print(insult)
-    api.update_status(insult, mention.id)
-    time.sleep(randint(60 * 3, 60 * 5))
+    #Say something mean
+    if sent.polarity < 5.0 or mention.lower().contains('roastme'):
+        #Generate random insult
+        insults = yaml.load(open('../insults.yml'))
+        insult = '@' + mention.user.screen_name + ' thou ' + choice(insults['column1']) + ' ' \
+                 + choice(insults['column2']) + ' ' + choice(insults['column3'])
+        print(insult)
+        #api.update_status(insult, mention.id)
+    #Say something nice
+    elif sent.polarity >= 5.0:
+        comps = yaml.load(open('../insults.yml'))
+        compliment = '@' + mention.user.screen_name + ' thou ' + choice(comps['column1']) + ' ' \
+                 + choice(comps['column2']) + ' ' + choice(comps['column3'])
+        print(compliment)
+        #api.update_status(compliment, mention.id)
 
 
 
