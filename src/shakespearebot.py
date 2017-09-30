@@ -134,7 +134,7 @@ def reply_tweets(mention):
     sent = analysis.sentiment
 
     #Say something mean
-    if sent.polarity < 0.0 or mention.text.lower().contains('roastme'):
+    if sent.polarity < 0.0 or 'roastme' in mention.text.lower():
         #Generate random insult
         insults = yaml.load(open('../insults.yml'))
         insult = '@' + mention.user.screen_name + ' thou ' + choice(insults['column1']) + ' ' \
