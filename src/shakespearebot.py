@@ -66,7 +66,9 @@ def main():
             config.write(configfile)
 
         sleep = randint(120, 14400)
-        print('Sleeping for ' + str(sleep) + "\nStarted at " + str(datetime.datetime.now().time()))
+        now = datetime.datetime.now()
+        print('Sleeping for ' + str((sleep / 60)) + " minutes\nStarted at "
+              + str(now.hour)+ ':' + str(now.minute) + ':' + str(now.second))
         time.sleep(sleep)
 
 
