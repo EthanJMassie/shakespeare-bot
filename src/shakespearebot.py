@@ -67,8 +67,9 @@ def main():
 
         sleep = randint(120, 14400)
         now = datetime.datetime.now()
-        print('Sleeping for ' + str((sleep / 60)) + " minutes\nStarted at "
-              + str(now.hour)+ ':' + str(now.minute) + ':' + str(now.second))
+        wake_up_at = now + datetime.timedelta(seconds=sleep)
+        print('Sleeping till ' + str(wake_up_at.hour) + ':' + str(wake_up_at.minute) + ':' + str(wake_up_at.second)
+              + " \nStarted sleep at " + str(now.hour)+ ':' + str(now.minute) + ':' + str(now.second))
         time.sleep(sleep)
 
 
@@ -129,7 +130,7 @@ def generateTweet():
                     break
     return error
 
-#TODO: Add logic for reply tweets
+
 def reply_tweets(mention):
     thankful_strings = ['thank you', 'thanks', 'thnx']
     fighting_words = ['roastme', 'roast me', '#roastme']
