@@ -30,14 +30,14 @@ def main():
 
         if not error and time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0)):
             print('Doing some tweeting')
-            #error = generateTweet()
+            error = generateTweet()
 
         if error:
             print("Rate limit reached\nCooling off...")
             time.sleep(120)
 
         print("Follow users")
-        #error = follow_users()
+        error = follow_users()
 
         if error:
             print("Rate limit reached\nCooling off...")
@@ -122,8 +122,7 @@ def generateTweet():
                         api.update_status(tweet)
 
                         time.sleep(240)
-                        if not time_range(datetime.time(randint(8), randint(0, 59), 0), datetime.time(22, randint(0, 59), 0)):
-                             return error
+                        return error
                 except tweepy.error.RateLimitError:
                     error = True
                     break
@@ -143,14 +142,14 @@ def reply_tweets(mention):
         insult = '@' + mention.user.screen_name + ' thou ' + choice(insults['column1']) + ' ' \
                  + choice(insults['column2']) + ' ' + choice(insults['column3'])
         print(insult)
-        #api.update_status(insult, mention.id)
+        api.update_status(insult, mention.id)
     #Say something nice
     elif sent.polarity >= .5:
         comps = yaml.load(open('../compliments.yml'))
         compliment = '@' + mention.user.screen_name + ' thou ' + choice(comps['column1']) + ' ' \
                  + choice(comps['column2']) + ' ' + choice(comps['column3'])
         print(compliment)
-        #api.update_status(compliment, mention.id)
+        api.update_status(compliment, mention.id)
 
 
 
