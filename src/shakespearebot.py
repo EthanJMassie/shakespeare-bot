@@ -160,18 +160,6 @@ def reply_tweets(mention):
         api.update_status(compliment, mention.id)
 
 
-
-#TODO: Add logic for replying to direct messages
-def direct_message_reply():
-    pass
-
-
-
-#TODO: Add logic for tagging people in tweets
-def tagged_tweet():
-    pass
-
-
 def delete_tweets():
     '''Deletes 20 most recent tweets'''
     for x in api.user_timeline():
