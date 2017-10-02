@@ -116,7 +116,7 @@ def generateTweet():
                         add += 1
 
                 except IndexError:
-                    pass
+                    break
                 try:
                     # Randomly select if a tweet should be posted and insure proper length
                     if randint(0, 15) == 2 and len(tweet) <= 140 and len(tweet) != 0:
