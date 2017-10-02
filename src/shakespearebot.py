@@ -132,14 +132,17 @@ def generateTweet():
 
 
 def reply_tweets(mention):
-    thankful_strings = ['thank you', 'thanks', 'thnx']
+    thankful_strings = ['thank you', 'thanks', 'thnx', 'thanketh', 'thanketh thee']
     fighting_words = ['roastme', 'roast me', '#roastme']
     '''Reply to mentions on twitter'''
     #Analyze parts of speech of mention and get sentiment
     analysis = TextBlob(mention.text)
     sent = analysis.sentiment
-
-    if any(x in mention.text.lower() for x in thankful_strings):
+    if '?' in mention.text:
+        reply = '@' + mention.user.screen_name + " s'rry thee und'rstand not"
+        print(reply)
+        api.update_status(reply, mention.id)
+    elif any(x in mention.text.lower() for x in thankful_strings):
         reply = '@' + mention.user.screen_name +  " Thou art welcometh"
         print(reply)
         api.update_status(reply, mention.id)
@@ -147,14 +150,14 @@ def reply_tweets(mention):
     elif sent.polarity < 0.0 or any(x in mention.text.lower() for x in fighting_words):
         #Generate random insult
         insults = yaml.load(open('../insults.yml'))
-        insult = '@' + mention.user.screen_name + ' thou ' + choice(insults['column1']) + ' ' \
+        insult = '@' + mention.user.screen_name + ' thou art a ' + choice(insults['column1']) + ' ' \
                  + choice(insults['column2']) + ' ' + choice(insults['column3'])
         print(insult)
         api.update_status(insult, mention.id)
     #Say something nice
     elif sent.polarity >= 0.0:
         comps = yaml.load(open('../compliments.yml'))
-        compliment = '@' + mention.user.screen_name + ' thou ' + choice(comps['column1']) + ' ' \
+        compliment = '@' + mention.user.screen_name + ' thou art a ' + choice(comps['column1']) + ' ' \
                  + choice(comps['column2']) + ' ' + choice(comps['column3'])
         print(compliment)
         api.update_status(compliment, mention.id)
