@@ -133,7 +133,7 @@ def generateTweet():
 
 def reply_tweets(mention):
     '''Reply to mentions on twitter'''
-    thankful_strings = ['thank you', 'thanks', 'thnx', 'thanketh']
+    thankful_strings = ['thank you', 'thanks', 'thnx', 'thanketh', 'thx']
     fighting_words = ['roastme', 'roast me', '#roastme']
 
     #Get sentiment of tweet
@@ -145,6 +145,8 @@ def reply_tweets(mention):
         api.update_status(reply, mention.id)
     elif any(x in mention.text.lower() for x in thankful_strings):
         reply = '@' + mention.user.screen_name +  " thou art welcometh"
+        if not mention.favorited:
+            api.create_favorite(mention.id)
         print(reply)
         api.update_status(reply, mention.id)
     #Say something mean
@@ -161,6 +163,8 @@ def reply_tweets(mention):
         compliment = '@' + mention.user.screen_name + ' thou art a ' + choice(comps['column1']) + ' ' \
                  + choice(comps['column2']) + ' ' + choice(comps['column3'])
         print(compliment)
+        if not mention.favorited:
+            api.create_favorite(mention.id)
         api.update_status(compliment, mention.id)
 
 
