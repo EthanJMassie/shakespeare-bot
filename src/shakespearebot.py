@@ -132,10 +132,11 @@ def generateTweet():
 
 
 def reply_tweets(mention):
-    thankful_strings = ['thank you', 'thanks', 'thnx', 'thanketh', 'thanketh thee']
-    fighting_words = ['roastme', 'roast me', '#roastme']
     '''Reply to mentions on twitter'''
-    #Analyze parts of speech of mention and get sentiment
+    thankful_strings = ['thank you', 'thanks', 'thnx', 'thanketh']
+    fighting_words = ['roastme', 'roast me', '#roastme']
+
+    #Get sentiment of tweet
     analysis = TextBlob(mention.text)
     sent = analysis.sentiment
     if '?' in mention.text:
@@ -143,7 +144,7 @@ def reply_tweets(mention):
         print(reply)
         api.update_status(reply, mention.id)
     elif any(x in mention.text.lower() for x in thankful_strings):
-        reply = '@' + mention.user.screen_name +  " Thou art welcometh"
+        reply = '@' + mention.user.screen_name +  " thou art welcometh"
         print(reply)
         api.update_status(reply, mention.id)
     #Say something mean
@@ -180,11 +181,14 @@ def follow_users():
                 api.create_friendship(follower.screen_name)
                 print("Now following " + follower.screen_name)
                 count += 1
-                if count >= 10:
-                    return False
                 time.sleep(40)
             time.sleep(20)
 
+        #Limit follows to 10
+        if count >= 10:
+            return False
+
+        #Follow random users by searching through friends of friends
         for friend in api.me().friends():
             for x in friend.friends():
                 if not x.following and x.screen_name != api.me().screen_name:
