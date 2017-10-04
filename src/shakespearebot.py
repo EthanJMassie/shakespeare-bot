@@ -24,12 +24,13 @@ api = tweepy.API(auth)
 
 
 def main():
-
+    dont_tweet = False
+    dont_tweet_till = None
     while True:
         error = False
 
         if not error and time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0))\
-                and randint(0, 3) == 2:
+                and randint(0, 3) == 2 and not dont_tweet:
             print('Doing some tweeting')
             error = generateTweet()
 
@@ -65,12 +66,15 @@ def main():
         with open('../config.ini', 'w') as configfile:
             config.write(configfile)
 
-        sleep = randint(120, 14400)
-        now = datetime.datetime.now()
-        wake_up_at = now + datetime.timedelta(seconds=sleep)
-        print('Sleeping till ' + str(wake_up_at.hour) + ':' + str(wake_up_at.minute) + ':' + str(wake_up_at.second)
-              + " \nStarted sleep at " + str(now.hour)+ ':' + str(now.minute) + ':' + str(now.second))
-        time.sleep(sleep)
+        if not dont_tweet:
+            sleep = randint(120, 14400)
+            now = datetime.datetime.now()
+            dont_tweet_till = now + datetime.timedelta(seconds=sleep)
+            dont_tweet = True
+            print('Not tweeting till ' + str(dont_tweet_till.hour) + ':' + str(dont_tweet_till.minute) + ':' + str(dont_tweet_till.second))
+        else :
+            if(datetime.datetime.now() >= dont_tweet_till):
+                dont_tweet = False
 
 
 
