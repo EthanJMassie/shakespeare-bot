@@ -74,12 +74,12 @@ def main():
             dont_tweet_till = now + datetime.timedelta(seconds=sleep)
             dont_tweet = True
             recent_status_up = False
-            print('Not tweeting till ' + str(dont_tweet_till.hour) + ':' + str(dont_tweet_till.minute) + ':' + str(dont_tweet_till.second))
+            print('Not tweeting till ' + str(dont_tweet_till))
         else :
             if(datetime.datetime.now() >= dont_tweet_till):
                 dont_tweet = False
             else:
-                print('Not tweeting till ' + str(dont_tweet_till.hour) + ':' + str(dont_tweet_till.minute) + ':' + str(dont_tweet_till.second))
+                print('Not tweeting till ' + str(dont_tweet_till))
 
 
 
