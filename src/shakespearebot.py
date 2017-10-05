@@ -26,14 +26,16 @@ api = tweepy.API(auth)
 def main():
     dont_tweet = False
     dont_tweet_till = None
+    recent_status_up = False
     while True:
         error = False
 
         if not error and time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0))\
                 and randint(0, 3) == 2 and not dont_tweet:
             print('Doing some tweeting')
-            error = generateTweet()
-
+            return_tuple = generateTweet()
+            error = return_tuple[0]
+            recent_status_up = return_tuple[1]
         if error:
             print("Rate limit reached\nCooling off...")
             time.sleep(120)
@@ -66,11 +68,12 @@ def main():
         with open('../config.ini', 'w') as configfile:
             config.write(configfile)
 
-        if not dont_tweet:
+        if not dont_tweet and recent_status_up:
             sleep = randint(120, 14400)
             now = datetime.datetime.now()
             dont_tweet_till = now + datetime.timedelta(seconds=sleep)
             dont_tweet = True
+            recent_status_up = False
             print('Not tweeting till ' + str(dont_tweet_till.hour) + ':' + str(dont_tweet_till.minute) + ':' + str(dont_tweet_till.second))
         else :
             if(datetime.datetime.now() >= dont_tweet_till):
@@ -130,11 +133,11 @@ def generateTweet():
                         api.update_status(tweet)
 
                         time.sleep(240)
-                        return error
+                        return error, True
                 except tweepy.error.RateLimitError:
                     error = True
                     break
-    return error
+    return error, False
 
 
 def reply_tweets(mention):
