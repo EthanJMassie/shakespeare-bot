@@ -25,7 +25,7 @@ api = tweepy.API(auth)
 
 def main():
     dont_tweet = False
-    dont_tweet_till = None
+    dont_tweet_till = datetime.datetime.now()
     recent_status_up = False
     while True:
         error = False
