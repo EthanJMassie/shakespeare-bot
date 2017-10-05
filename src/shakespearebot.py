@@ -75,6 +75,8 @@ def main():
         else :
             if(datetime.datetime.now() >= dont_tweet_till):
                 dont_tweet = False
+            else:
+                print('Not tweeting till ' + str(dont_tweet_till.hour) + ':' + str(dont_tweet_till.minute) + ':' + str(dont_tweet_till.second))
 
 
 
