@@ -69,7 +69,7 @@ def main():
             config.write(configfile)
 
         if not dont_tweet and recent_status_up:
-            sleep = randint(120, 14400)
+            sleep = randint(7200, 14400)
             now = datetime.datetime.now()
             dont_tweet_till = now + datetime.timedelta(seconds=sleep)
             dont_tweet = True
