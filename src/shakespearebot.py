@@ -142,22 +142,51 @@ def generateTweet():
 
 def reply_tweets(mention):
     '''Reply to mentions on twitter'''
+
+    #Lists of keywords
     thankful_strings = ['thank you', 'thanks', 'thnx', 'thanketh', 'thx']
     fighting_words = ['roastme', 'roast me', '#roastme']
+    questions = ['who', '?', 'what', 'how', 'when', 'where']
+
+
+
+    #Reply lists
+    question_replies = [" Thou w're not meanteth to und'rstand", " s'rry thee und'rstand not", " wherefore art thou confused?"]
+    youre_welcome = [" 't is nay problem", " thou art welcome", " 't is mine pleasure"]
 
     #Get sentiment of tweet
     analysis = TextBlob(mention.text)
     sent = analysis.sentiment
-    if '?' in mention.text:
-        reply = '@' + mention.user.screen_name + " s'rry thee und'rstand not"
+
+
+
+
+    #Reply to a question
+    if any(x in mention.text.lower() for x in questions):
+        reply = '@' + mention.user.screen_name + choice(question_replies)
         print(reply)
         api.update_status(reply, mention.id)
+        return
+    #Say you're welcome if they thank him
     elif any(x in mention.text.lower() for x in thankful_strings):
-        reply = '@' + mention.user.screen_name +  " thou art welcometh"
+        reply = '@' + mention.user.screen_name +  choice(youre_welcome)
         if not mention.favorited:
             api.create_favorite(mention.id)
         print(reply)
         api.update_status(reply, mention.id)
+        return
+
+    #Don't reply if he's already insulted or complimented them
+    if mention.in_reply_to_status_id != None:
+        previous_reply = api.get_status(mention.in_reply_to_status_id)
+        insults = yaml.load(open('../insults.yml'))
+        comps = yaml.load(open('../compliments.yml'))
+        #Check if the last tweet was an insult or complement
+        if any(x.lower() in previous_reply.text.lower() for x in insults['column1'])\
+                or any(y.lower() in previous_reply.text.lower() for y in comps['column1']):
+            if not mention.favorited:
+                api.create_favorite(mention.id)
+            return
     #Say something mean
     elif sent.polarity < 0.0 or any(x in mention.text.lower() for x in fighting_words):
         #Generate random insult
