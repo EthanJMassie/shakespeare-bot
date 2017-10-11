@@ -249,7 +249,6 @@ def follow_users():
                     return False
                 time.sleep(60)
     except tweepy.error.RateLimitError:
-        print("Rate limit reached")
         return True
     except tweepy.error.TweepError as e:
         print("Error: " + str(e) )
