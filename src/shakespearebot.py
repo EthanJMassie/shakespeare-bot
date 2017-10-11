@@ -24,52 +24,51 @@ api = tweepy.API(auth)
 
 
 def main():
-    dont_tweet = False
-    dont_tweet_till = datetime.datetime.now()
-    recent_status_up = False
+    #Set limit values from config file
+    dont_tweet = str_to_bool(config['Limits']['dont_tweet'])
+    dont_tweet_till = datetime.datetime.strptime(config['Limits']['dont_tweet_till'], "%Y-%m-%d %H:%M:%S.%f")
+    recent_status_up = str_to_bool(config['Limits']['recent_status_up'])
+    dont_follow = str_to_bool(config['Limits']['dont_follow'])
+    dont_follow_till = datetime.datetime.strptime(config['Limits']['dont_follow_till'], "%Y-%m-%d %H:%M:%S.%f")
     while True:
         error = False
 
-        if not error and time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0))\
+        if time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0))\
                 and randint(0, 3) == 2 and not dont_tweet:
             print('Doing some tweeting')
             return_tuple = generateTweet()
             error = return_tuple[0]
             recent_status_up = return_tuple[1]
-        if error:
-            print("Rate limit reached\nCooling off...")
-            time.sleep(3600)
 
+        if not dont_follow:
+            print("Follow users")
+            error = follow_users()
 
-        print("Follow users")
-        error = follow_users()
-
-        if error:
-            print("Rate limit reached\nCooling off...")
-            time.sleep(3600)
-            
 
         #Check for mentions and reply to them
         since_id = config['ID']['since_id']
-        while True:
+        for p in range(1, 3):
             try:
-                mentions = api.search(q='@RealBillyShake' + '-filter:retweets', count=100, since_id=since_id)
+                mentions = api.search(q='@RealBillyShake' + '-filter:retweets', page=p, since_id=since_id)
                 if not mentions:
-                    print("No mentions found")
-                    break
-                for tweet in mentions:
-                    if int(tweet.id) > int(since_id):
-                        since_id = tweet.id
-                        reply_tweets(tweet)
+                    print("No mentions found for page " + str(p))
+                else:
+                    for tweet in mentions:
+                        if int(tweet.id) > int(since_id):
+                            since_id = tweet.id
+                            reply_tweets(tweet)
 
             except tweepy.TweepError as e:
                 print("Error: " + str(e))
                 break
+
+        #Store new since_id in config
         config.set('ID', 'since_id', str(since_id))
 
         with open('../config.ini', 'w') as configfile:
             config.write(configfile)
 
+        #Stop tweeting till a random amount of time has past
         if not dont_tweet and recent_status_up:
             sleep = randint(7200, 14400)
             now = datetime.datetime.now()
@@ -77,11 +76,41 @@ def main():
             dont_tweet = True
             recent_status_up = False
             print('Not tweeting till ' + str(dont_tweet_till))
+
+            #Store new limits in config
+            config.set('Limits', 'dont_follow_till', str(dont_follow_till))
+            config.set('Limits', 'dont_follow', 'True')
+            with open('../config.ini', 'w') as configfile:
+                config.write(configfile)
         else :
             if(datetime.datetime.now() >= dont_tweet_till):
                 dont_tweet = False
+                config.set('Limits', 'dont_tweet', 'False')
+                with open('../config.ini', 'w') as configfile:
+                    config.write(configfile)
             else:
                 print('Not tweeting till ' + str(dont_tweet_till))
+
+        #Stop following for 2 days if an error is returned from follow_users
+        if not dont_follow and error:
+            now = datetime.datetime.now()
+            dont_tweet_till = now + datetime.timedelta(days=2)
+            dont_follow = True
+            print('Not following till ' + str(dont_follow_till))
+
+            #Store new limits in config
+            config.set('Limits', 'dont_follow_till', str(dont_follow_till))
+            config.set('Limits', 'dont_follow', 'True')
+            with open('../config.ini', 'w') as configfile:
+                config.write(configfile)
+        else:
+            if(datetime.datetime.now() >= dont_follow_till):
+                dont_follow = False
+                config.set('Limits', 'dont_follow', 'False')
+                with open('../config.ini', 'w') as configfile:
+                    config.write(configfile)
+            else:
+                print('Not following till ' + str(dont_follow_till))
 
 
 
@@ -263,5 +292,13 @@ def time_range(start, end):
         return start <= now <= end
     else:
         return start <= now or now <= end
+
+def str_to_bool(s):
+    if s == 'True':
+        return True
+    elif s == 'False':
+        return False
+
+    return False
 
 main()
