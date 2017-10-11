@@ -217,6 +217,7 @@ def follow_users():
     '''Finds users to follow'''
     try:
         count = 0
+        already_following = 0
         #Follow users that follow account
         for follower in api.me().followers():
             if not follower.following:
@@ -224,6 +225,11 @@ def follow_users():
                 print("Now following " + follower.screen_name)
                 count += 1
                 time.sleep(40)
+            else:
+                already_following += 1
+                time.sleep(40)
+            if already_following >= 20:
+                break
             time.sleep(20)
 
         #Limit follows to 10
