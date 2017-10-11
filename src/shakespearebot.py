@@ -47,11 +47,12 @@ def main():
 
         #Check for mentions and reply to them
         since_id = config['ID']['since_id']
-        for p in range(1, 3):
+        while True:
             try:
-                mentions = api.search(q='@RealBillyShake' + '-filter:retweets', page=p, since_id=since_id)
+                mentions = api.search(q='@RealBillyShake' + '-filter:retweets', since_id=since_id)
                 if not mentions:
-                    print("No mentions found for page " + str(p))
+                    print("No mentions found")
+                    break
                 else:
                     for tweet in mentions:
                         if int(tweet.id) > int(since_id):
@@ -112,6 +113,8 @@ def main():
                     config.write(configfile)
             else:
                 print('Not following till ' + str(dont_follow_till))
+
+        time.sleep(120)
 
 
 
