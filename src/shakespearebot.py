@@ -78,7 +78,7 @@ def main():
             print('Not tweeting till ' + str(dont_tweet_till))
 
             #Store new limits in config
-            config.set('Limits', 'dont_tweet_till', str(dont_follow_till))
+            config.set('Limits', 'dont_tweet_till', str(dont_tweet_till))
             config.set('Limits', 'dont_tweet', 'True')
             config.set('Limits', recent_status_up, 'False')
             with open('../config.ini', 'w') as configfile:
