@@ -80,7 +80,7 @@ def main():
             #Store new limits in config
             config.set('Limits', 'dont_tweet_till', str(dont_tweet_till))
             config.set('Limits', 'dont_tweet', 'True')
-            config.set('Limits', recent_status_up, 'False')
+            config.set('Limits', 'recent_status_up', 'False')
             with open('../config.ini', 'w') as configfile:
                 config.write(configfile)
         else :
