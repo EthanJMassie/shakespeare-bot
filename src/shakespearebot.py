@@ -78,8 +78,9 @@ def main():
             print('Not tweeting till ' + str(dont_tweet_till))
 
             #Store new limits in config
-            config.set('Limits', 'dont_follow_till', str(dont_follow_till))
-            config.set('Limits', 'dont_follow', 'True')
+            config.set('Limits', 'dont_tweet_till', str(dont_follow_till))
+            config.set('Limits', 'dont_tweet', 'True')
+            config.set('Limits', recent_status_up, 'False')
             with open('../config.ini', 'w') as configfile:
                 config.write(configfile)
         else :
@@ -94,7 +95,7 @@ def main():
         #Stop following for 2 days if an error is returned from follow_users
         if not dont_follow and error:
             now = datetime.datetime.now()
-            dont_tweet_till = now + datetime.timedelta(days=2)
+            dont_follow_till = now + datetime.timedelta(days=2)
             dont_follow = True
             print('Not following till ' + str(dont_follow_till))
 
