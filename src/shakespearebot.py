@@ -38,16 +38,16 @@ def main():
             recent_status_up = return_tuple[1]
         if error:
             print("Rate limit reached\nCooling off...")
-            time.sleep(360)
-            error = False
+            time.sleep(3600)
+
 
         print("Follow users")
         error = follow_users()
 
         if error:
             print("Rate limit reached\nCooling off...")
-            time.sleep(360)
-            error = False
+            time.sleep(3600)
+            
 
         #Check for mentions and reply to them
         since_id = config['ID']['since_id']
