@@ -7,6 +7,7 @@ from textblob import TextBlob
 import time
 import yaml
 import datetime
+import sys
 
 #Initialize parser for reading config file
 config = configparser.ConfigParser()
@@ -14,13 +15,37 @@ config = configparser.ConfigParser()
 #Read from config file in the above directory
 config.read('../config.ini')
 
-#Uses keys defined in the config.ini file to authenticate connection with twitter account
-#Don't forget to add your keys to config.ini
-auth = tweepy.OAuthHandler(config['OAuth']['public'], config['OAuth']['private'])
-auth.set_access_token(config['AccessToken']['public'],config['AccessToken']['private'])
+#Checks if config file has the proper information/exists
+#If not creates a template for the config file
+auth = tweepy.OAuthHandler
+try:
+    auth = tweepy.OAuthHandler(config['OAuth']['public'], config['OAuth']['private'])
+    auth.set_access_token(config['AccessToken']['public'],config['AccessToken']['private'])
+except KeyError:
+    print("No config.ini file present\nCreating new config.ini file...")
+
+    config.add_section('OAuth')
+    config.set('OAuth', 'public', '')
+    config.set('OAuth', 'private', '')
+    config.add_section('AccessToken')
+    config.set('AccessToken', 'public', '')
+    config.set('AccessToken', 'private', '')
+    config.add_section("ID")
+    config.set("ID", 'since_id', '')
+    config.add_section('Limits')
+    config.set('Limits', 'dont_tweet_till', str(datetime.datetime.now()))
+    config.set('Limits', 'dont_tweet', 'False')
+    config.set('Limits', 'dont_follow_till', str(datetime.datetime.now()))
+    config.set('Limits', 'dont_follow', 'False')
+    config.set('Limits', 'recent_status_up', 'False')
+    with open('../config.ini', 'w') as configfile:
+        config.write(configfile)
+    print("Add your twitter key values to config.ini file before running the program")
+    sys.exit(1)
 
 #Initialize Tweepy api with authentication keys
 api = tweepy.API(auth)
+
 
 
 def main():
