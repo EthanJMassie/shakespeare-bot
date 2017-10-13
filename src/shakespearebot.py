@@ -97,7 +97,7 @@ def main():
         #Stop tweeting till a random amount of time has past
         if not dont_tweet and recent_status_up:
             now = datetime.datetime.now()
-            dont_tweet_till = now + datetime.timedelta(seconds=randint(60 * 6, 60 *16))
+            dont_tweet_till = now + datetime.timedelta(seconds=randint(3600 * 6, 3600 *16))
             dont_tweet = True
             recent_status_up = False
             print('Not tweeting till ' + str(dont_tweet_till))
