@@ -75,7 +75,7 @@ def main():
         while True:
             try:
                 mentions = api.search(q='@RealBillyShake' + '-filter:retweets', since_id=since_id)
-                if not mentions:
+                if mentions == None:
                     print("No mentions found")
                     break
                 else:
