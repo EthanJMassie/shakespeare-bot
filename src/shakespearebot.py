@@ -235,19 +235,8 @@ def reply_tweets(mention):
         api.update_status(reply, mention.id)
         return
 
-    #Don't reply if he's already insulted or complimented them
-    if mention.in_reply_to_status_id != None:
-        previous_reply = api.get_status(mention.in_reply_to_status_id)
-        insults = yaml.load(open('../insults.yml'))
-        comps = yaml.load(open('../compliments.yml'))
-        #Check if the last tweet was an insult or complement
-        if any(x.lower() in previous_reply.text.lower() for x in insults['column1'])\
-                or any(y.lower() in previous_reply.text.lower() for y in comps['column1']):
-            if not mention.favorited:
-                api.create_favorite(mention.id)
-            return
     #Say something mean
-    elif sent.polarity < 0.0 or any(x in mention.text.lower() for x in fighting_words):
+    if sent.polarity < 0.0 or any(x in mention.text.lower() for x in fighting_words):
         #Generate random insult
         insults = yaml.load(open('../insults.yml'))
         insult = '@' + mention.user.screen_name + ' thou art a ' + choice(insults['column1']) + ' ' \
