@@ -56,20 +56,31 @@ def main():
     dont_follow = str_to_bool(config['Limits']['dont_follow'])
     dont_follow_till = datetime.datetime.strptime(config['Limits']['dont_follow_till'], "%Y-%m-%d %H:%M:%S.%f")
     while True:
-        error = False
+        rate_limit = False
+        follow_error = False
 
         if time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0))\
                 and randint(0, 3) == 2 and not dont_tweet:
             print('Doing some tweeting')
             return_tuple = generateTweet()
-            error = return_tuple[0]
+            rate_limit = return_tuple[0]
             recent_status_up = return_tuple[1]
+
+        if rate_limit:
+            print("Rate limit reached cooling off for a bit")
+            time.sleep(360)
 
         if not dont_follow:
             print("Follow users")
-            error = follow_users()
+            errors = follow_users()
+            rate_limit = errors[0]
+            follow_error = errors[1]
 
+        if rate_limit:
+            print("Rate limit reached cooling off for a bit")
+            time.sleep(360)
 
+            
         #Check for mentions and reply to them
         since_id = config['ID']['since_id']
         while True:
@@ -117,10 +128,10 @@ def main():
             else:
                 print('Not tweeting till ' + str(dont_tweet_till))
 
-        #Stop following for 2 days if an error is returned from follow_users
-        if not dont_follow and error:
+        #Stop following for a week if an rate_limit is returned from follow_users
+        if not dont_follow and follow_error:
             now = datetime.datetime.now()
-            dont_follow_till = now + datetime.timedelta(days=2)
+            dont_follow_till = now + datetime.timedelta(days=7)
             dont_follow = True
             print('Not following till ' + str(dont_follow_till))
 
@@ -129,7 +140,7 @@ def main():
             config.set('Limits', 'dont_follow', 'True')
             with open('../config.ini', 'w') as configfile:
                 config.write(configfile)
-        else:
+        elif dont_follow :
             if(datetime.datetime.now() >= dont_follow_till):
                 dont_follow = False
                 config.set('Limits', 'dont_follow', 'False')
@@ -282,7 +293,7 @@ def follow_users():
 
         #Limit follows to 10
         if count >= 10:
-            return False
+            return False, False
 
         #Follow random users by searching through friends of friends
         for friend in api.me().friends():
@@ -292,14 +303,15 @@ def follow_users():
                     print("Now following " + x.screen_name)
                     count += 1
                 if count >= 10:
-                    return False
+                    return False, False
                 time.sleep(60)
     except tweepy.error.RateLimitError:
-        return True
+        return True, False
     except tweepy.error.TweepError as e:
         print("Error: " + str(e) )
+        return False, True
 
-    return False
+    return False, False
 
 
 def time_range(start, end):
