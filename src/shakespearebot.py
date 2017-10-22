@@ -78,9 +78,10 @@ def main():
 
         if rate_limit:
             print("Rate limit reached cooling off for a bit")
+            rate_limit = False
             time.sleep(360)
 
-            
+
         #Check for mentions and reply to them
         since_id = config['ID']['since_id']
         while True:
@@ -97,6 +98,7 @@ def main():
 
             except tweepy.TweepError as e:
                 print("Error: " + str(e))
+                rate_limit = True
                 break
 
         #Store new since_id in config
@@ -104,6 +106,10 @@ def main():
 
         with open('../config.ini', 'w') as configfile:
             config.write(configfile)
+
+        if rate_limit:
+            print("Rate limit reached cooling off for a bit")
+            time.sleep(360)
 
         #Stop tweeting till a random amount of time has past
         if not dont_tweet and recent_status_up:
