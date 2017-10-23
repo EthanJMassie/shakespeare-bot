@@ -54,6 +54,9 @@ def main():
     recent_status_up = str_to_bool(config['Limits']['recent_status_up'])
     dont_follow = str_to_bool(config['Limits']['dont_follow'])
     dont_follow_till = datetime.datetime.strptime(config['Limits']['dont_follow_till'], "%Y-%m-%d %H:%M:%S.%f")
+
+    print('Not following till ' + str(dont_follow_till))
+    print('Not tweeting till ' + str(dont_tweet_till))
     while True:
         rate_limit = False
         follow_error = False
@@ -111,7 +114,8 @@ def main():
 
 
         # Insult Eric
-        if not dont_tweet:
+        if not dont_tweet and time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0))\
+                and not recent_status_up:
             try:
                 # Generate random insult
                 insults = yaml.load(open('../insults.yml'))
