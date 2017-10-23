@@ -115,7 +115,7 @@ def main():
 
         # Insult Eric
         if not dont_tweet and time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0))\
-                and not recent_status_up:
+                and not recent_status_up and randint(0, 2) == 1:
             try:
                 # Generate random insult
                 insults = yaml.load(open('../insults.yml'))
