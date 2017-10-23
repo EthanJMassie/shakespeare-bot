@@ -112,12 +112,18 @@ def main():
 
         # Insult Eric
         if not dont_tweet:
-            # Generate random insult
-            insults = yaml.load(open('../insults.yml'))
-            insult = '@commentiquette' + ' thou art a ' + choice(insults['column1']) + ' ' \
-                     + choice(insults['column2']) + ' ' + choice(insults['column3'])
-            print(insult)
-            api.update_status(insult)
+            try:
+                # Generate random insult
+                insults = yaml.load(open('../insults.yml'))
+                insult = '@commentiquette' + ' thou art a ' + choice(insults['column1']) + ' ' \
+                         + choice(insults['column2']) + ' ' + choice(insults['column3'])
+                print(insult)
+                api.update_status(insult)
+            except tweepy.RateLimitError as e:
+                print("Error: " + str(e))
+                time.sleep(360)
+            except tweepy.TweepError as e:
+                print("Error: " + str(e))
 
         # Stop tweeting till a random amount of time has past
         if not dont_tweet and recent_status_up:
