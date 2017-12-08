@@ -64,7 +64,7 @@ def main():
         if time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0)) \
                 and randint(0, 3) == 2 and not dont_tweet:
             print('Doing some tweeting')
-            return_tuple = generateTweet()
+            return_tuple = generate_tweet()
             rate_limit = return_tuple[0]
             recent_status_up = return_tuple[1]
 
@@ -112,23 +112,6 @@ def main():
             print("Rate limit reached cooling off for a bit")
             time.sleep(360)
 
-
-        # Insult Eric
-        if not dont_tweet and time_range(datetime.time(8, randint(0, 59), 0), datetime.time(22, randint(0, 59), 0))\
-                and not recent_status_up and randint(0, 2) == 1:
-            try:
-                # Generate random insult
-                insults = yaml.load(open('../insults.yml'))
-                insult = '@commentiquette' + ' thou art a ' + choice(insults['column1']) + ' ' \
-                         + choice(insults['column2']) + ' ' + choice(insults['column3'])
-                print(insult)
-                api.update_status(insult)
-            except tweepy.RateLimitError as e:
-                print("Error: " + str(e))
-                time.sleep(360)
-            except tweepy.TweepError as e:
-                print("Error: " + str(e))
-
         # Stop tweeting till a random amount of time has past
         if not dont_tweet and recent_status_up:
             now = datetime.datetime.now()
@@ -144,7 +127,7 @@ def main():
             with open('../config.ini', 'w') as configfile:
                 config.write(configfile)
         else:
-            if (datetime.datetime.now() >= dont_tweet_till):
+            if datetime.datetime.now() >= dont_tweet_till:
                 dont_tweet = False
                 config.set('Limits', 'dont_tweet', 'False')
                 with open('../config.ini', 'w') as configfile:
@@ -173,13 +156,10 @@ def main():
             else:
                 print('Not following till ' + str(dont_follow_till))
 
-
-
-
         time.sleep(120)
 
 
-def generateTweet():
+def generate_tweet():
     files = list(shakespeare.fileids())
     rand_file = choice(files)
 
@@ -215,7 +195,7 @@ def generateTweet():
                             new_line = True
 
                         # If it isn't a new line char add to the tweet
-                        if not '\n' in text[y + add]:
+                        if '\n' not in text[y + add]:
                             tweet += ' ' + text[y + add]
                             new_line = False
                         add += 1
