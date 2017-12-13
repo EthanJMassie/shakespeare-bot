@@ -2,8 +2,8 @@
 A twitter bot that tweets in Shakespeare quotes
 
 ## Dependencies
-tweepy,
-text-blob,
-nltk,
-nltk shakespeare corpus,
-pyyaml,
+*tweepy
+*text-blob
+*nltk
+*nltk shakespeare corpus
+*pyyaml
